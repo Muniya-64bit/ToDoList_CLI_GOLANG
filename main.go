@@ -100,6 +100,31 @@ func (t *Todos) List() {
 	}
 }
 
+const (
+	ColorDefault = "\x1b[39m"
+
+	ColorRed   = "\x1b[91m"
+	ColorGreen = "\x1b[32m"
+	ColorBlue  = "\x1b[94m"
+	ColorGray  = "\x1b[90m"
+)
+
+func red(s string) string {
+	return fmt.Sprintf("%s%s%s", ColorRed, s, ColorDefault)
+}
+
+func green(s string) string {
+	return fmt.Sprintf("%s%s%s", ColorGreen, s, ColorDefault)
+}
+
+func blue(s string) string {
+	return fmt.Sprintf("%s%s%s", ColorBlue, s, ColorDefault)
+}
+
+func gray(s string) string {
+	return fmt.Sprintf("%s%s%s", ColorGray, s, ColorDefault)
+}
+
 func (t *Todos) Print() {
 	table := simpletable.New()
 	table.Header = &simpletable.Header{
@@ -114,9 +139,13 @@ func (t *Todos) Print() {
 	var cells [][]*simpletable.Cell
 	for idx, item := range *t {
 		idx++
+		task := blue(item.Task)
+		if item.Done {
+			task = green(fmt.Sprintf("\u2705 %s", item.Task))
+		}
 		cells = append(cells, *&[]*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", idx)},
-			{Text: item.Task},
+			{Text: task},
 			{Text: fmt.Sprintf("%t", item.Done)},
 			{Text: item.CreatedDate.Format(time.RFC1123Z)},
 			{Text: item.CompletedDate.Format(time.RFC1123Z)},
@@ -129,6 +158,7 @@ func (t *Todos) Print() {
 	table.SetStyle(simpletable.StyleUnicode)
 	table.Println()
 }
+
 func main() {
 	// Define flags for CLI commands
 	add := flag.String("add", "", "Add a task to the list")

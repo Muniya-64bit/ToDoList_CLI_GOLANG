@@ -3,6 +3,7 @@
 A simple and interactive Command Line Interface (CLI) application to manage your todos. This app allows you to add tasks, mark them as completed, delete tasks, and view your todo list in a tabular format.
 
 ---
+![logo]("C:\Users\MUNIYA\GolandProjects\awesomeProject1\logo.webp")
 
 ## Features 🚀
 

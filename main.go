@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"time"
@@ -17,38 +18,41 @@ type item struct {
 
 type Todos []item
 
-// Add a new task to the Todos list
-func (t *Todos) add(task string) {
+// Add adds a new task to the Todos list
+func (t *Todos) Add(task string) {
 	todo := item{
 		Task:        task,
 		Done:        false,
 		CreatedDate: time.Now(),
 	}
 	*t = append(*t, todo)
+	fmt.Println("Task added successfully!")
 }
 
-// Mark a task as completed by its index
-func (t *Todos) complete(index int) error {
+// Complete marks a task as completed by its index
+func (t *Todos) Complete(index int) error {
 	ls := *t
 	if index <= 0 || index > len(ls) {
 		return errors.New("index out of range")
 	}
 	ls[index-1].CompletedDate = time.Now()
 	ls[index-1].Done = true
+	fmt.Printf("Task %d marked as completed!\n", index)
 	return nil
 }
 
-// Delete a task by its index
+// Delete removes a task by its index
 func (t *Todos) Delete(index int) error {
 	ls := *t
 	if index <= 0 || index > len(ls) {
 		return errors.New("index out of range")
 	}
 	*t = append(ls[:index-1], ls[index:]...)
+	fmt.Printf("Task %d deleted successfully!\n", index)
 	return nil
 }
 
-// Load Todos from a JSON file
+// Load reads Todos from a JSON file
 func (t *Todos) Load(filename string) error {
 	file, err := os.ReadFile(filename)
 	if err != nil {
@@ -67,7 +71,7 @@ func (t *Todos) Load(filename string) error {
 	return nil
 }
 
-// Store Todos to a JSON file
+// Store writes Todos to a JSON file
 func (t *Todos) Store(filename string) error {
 	// Marshal Todos into JSON
 	data, err := json.MarshalIndent(t, "", "  ")
@@ -83,36 +87,62 @@ func (t *Todos) Store(filename string) error {
 	return nil
 }
 
+// List displays all tasks with their statuses
+func (t *Todos) List() {
+	fmt.Println("Todo List:")
+	for i, todo := range *t {
+		status := "Incomplete"
+		if todo.Done {
+			status = "Completed"
+		}
+		fmt.Printf("%d. %s (Status: %s, Created: %s)\n", i+1, todo.Task, status, todo.CreatedDate.Format(time.RFC1123))
+	}
+}
+
 func main() {
-	todos := &Todos{}
+	// Define flags for CLI commands
+	add := flag.String("add", "", "Add a task to the list")
+	complete := flag.Int("complete", 0, "Mark a task as completed (provide index)")
+	delete := flag.Int("delete", 0, "Delete a task (provide index)")
+	list := flag.Bool("list", false, "List all tasks")
+
+	// Parse the command-line flags
+	flag.Parse()
 
 	// Load existing Todos from file
+	todos := &Todos{}
 	err := todos.Load("todos.json")
 	if err != nil {
-		fmt.Println("Error loading todos:", err)
-		return
+		fmt.Fprintln(os.Stderr, "Error loading todos:", err)
+		os.Exit(1)
 	}
 
-	// Add a new task
-	todos.add("Learn Go")
-
-	// Mark the first task as complete
-	err = todos.complete(1)
-	if err != nil {
-		fmt.Println("Error completing task:", err)
+	// Handle user commands
+	switch {
+	case *add != "":
+		todos.Add(*add)
+	case *complete > 0:
+		err := todos.Complete(*complete)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+		}
+	case *delete > 0:
+		err := todos.Delete(*delete)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+		}
+	case *list:
+		todos.List()
+	default:
+		fmt.Println("Usage:")
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
 
-	// Delete a task
-	err = todos.Delete(1)
-	if err != nil {
-		fmt.Println("Error deleting task:", err)
-	}
-
-	// Store updated Todos back to file
+	// Save Todos back to file
 	err = todos.Store("todos.json")
 	if err != nil {
-		fmt.Println("Error storing todos:", err)
+		fmt.Fprintln(os.Stderr, "Error storing todos:", err)
+		os.Exit(1)
 	}
-
-	fmt.Println("Todos updated successfully!")
 }

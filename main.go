@@ -1,21 +1,50 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"time"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
+type item struct {
+	Task          string
+	Done          bool
+	CreatedDate   time.Time
+	CompletedDate time.Time
+}
+
+type Todos []item
+
+func (t *Todos) add(task string) {
+	todo := item{
+		Task:          task,
+		Done:          false,
+		CreatedDate:   time.Now(),
+		CompletedDate: time.Time{},
+	}
+	*t = append(*t, todo)
+}
+
+func (t *Todos) complete(index int) error {
+	ls := *t
+	if index <= 0 || index > len(ls) {
+		return errors.New("index out of range")
+	}
+	ls[index-1].CompletedDate = time.Now()
+	ls[index-1].Done = true
+	return nil
+}
+
+func (t *Todos) Delete(index int) error {
+	ls := *t
+	if index <= 0 || index > len(ls) {
+		return errors.New("index out of range")
+	}
+	*t = append(ls[:index-1], ls[index:]...)
+}
 
 func main() {
-	//TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-	// to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-	s := "gopher"
-	fmt.Println("Hello and welcome, %s!", s)
 
-	for i := 1; i <= 5; i++ {
-		//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-		fmt.Println("i =", 100/i)
-	}
+	fmt.Println("Hello and welcome!")
+
 }

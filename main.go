@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/alexeyco/simpletable"
 	"os"
 	"time"
 )
@@ -99,6 +100,35 @@ func (t *Todos) List() {
 	}
 }
 
+func (t *Todos) Print() {
+	table := simpletable.New()
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "#"},
+			{Align: simpletable.AlignCenter, Text: "Task"},
+			{Align: simpletable.AlignCenter, Text: "Done"},
+			{Align: simpletable.AlignCenter, Text: "CreatedAt"},
+			{Align: simpletable.AlignCenter, Text: "CompletedAt"},
+		},
+	}
+	var cells [][]*simpletable.Cell
+	for idx, item := range *t {
+		idx++
+		cells = append(cells, *&[]*simpletable.Cell{
+			{Text: fmt.Sprintf("%d", idx)},
+			{Text: item.Task},
+			{Text: fmt.Sprintf("%t", item.Done)},
+			{Text: item.CreatedDate.Format(time.RFC1123Z)},
+			{Text: item.CompletedDate.Format(time.RFC1123Z)},
+		})
+	}
+	table.Body = &simpletable.Body{Cells: cells}
+	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
+		{Align: simpletable.AlignCenter, Span: 5, Text: "Your todos are here"},
+	}}
+	table.SetStyle(simpletable.StyleUnicode)
+	table.Println()
+}
 func main() {
 	// Define flags for CLI commands
 	add := flag.String("add", "", "Add a task to the list")
@@ -132,7 +162,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Error:", err)
 		}
 	case *list:
-		todos.List()
+		todos.Print()
 	default:
 		fmt.Println("Usage:")
 		flag.PrintDefaults()

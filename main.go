@@ -140,13 +140,15 @@ func (t *Todos) Print() {
 	for idx, item := range *t {
 		idx++
 		task := blue(item.Task)
+		done := blue("No")
 		if item.Done {
 			task = green(fmt.Sprintf("\u2705 %s", item.Task))
+			done = green("Yes")
 		}
 		cells = append(cells, *&[]*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", idx)},
 			{Text: task},
-			{Text: fmt.Sprintf("%t", item.Done)},
+			{Text: fmt.Sprintf(done)},
 			{Text: item.CreatedDate.Format(time.RFC1123Z)},
 			{Text: item.CompletedDate.Format(time.RFC1123Z)},
 		})

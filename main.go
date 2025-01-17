@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -41,6 +43,24 @@ func (t *Todos) Delete(index int) error {
 		return errors.New("index out of range")
 	}
 	*t = append(ls[:index-1], ls[index:]...)
+	return nil
+}
+
+func (t *Todos) Load(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+	}
+	if len(file) == 0 {
+		return err
+	}
+	err = json.Unmarshal(file, t)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {

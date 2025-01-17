@@ -87,6 +87,7 @@ Here’s an example of the `-list` command output:
 │ 2 │ Submit the assignment          │ Yes   │ Wed, 15 Jan 2025 13:00:00 +0000      │                    
 └───┴────────────────────────────────┴──────────┴────────────────┴──────────────────┴
 ```
+![Alt text](todo-list.png)
 
 ---
 

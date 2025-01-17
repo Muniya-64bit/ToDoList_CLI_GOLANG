@@ -152,6 +152,7 @@ func (t *Todos) Print() {
 			{Text: item.CreatedDate.Format(time.RFC1123Z)},
 			{Text: item.CompletedDate.Format(time.RFC1123Z)},
 		})
+
 	}
 	table.Body = &simpletable.Body{Cells: cells}
 	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
